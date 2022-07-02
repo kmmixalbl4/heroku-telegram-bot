@@ -1,20 +1,45 @@
-# -*- coding: utf-8 -*-
-import redis
-import os
-import telebot
-# import some_api_lib
-# import ...
+import logging
+from aiogram import Bot, Dispatcher, executor, types
 
-# Example of your code beginning
-#           Config vars
-token = os.environ['TELEGRAM_TOKEN']
-some_api_token = os.environ['SOME_API_TOKEN']
-#             ...
+API_TOKEN = 'TOKK_K'
 
-# If you use redis, install this add-on https://elements.heroku.com/addons/heroku-redis
-r = redis.from_url(os.environ.get("REDIS_URL"))
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
-#       Your bot code below
-# bot = telebot.TeleBot(token)
-# some_api = some_api_lib.connect(some_api_token)
-#              ...
+# Initialize bot and dispatcher
+bot = Bot(token=API_TOKEN)
+dp = Dispatcher(bot)
+
+@dp.message_handler(commands=['start', 'help'])
+async def send_welcome(message: types.Message):
+    """
+    This handler will be called when user sends `/start` or `/help` command
+    """
+    await message.reply("Hi!\nI'm EchoBot!\nPowered by aiogram.")
+
+@dp.message_handler(regexp='(^cat[s]?$|puss)')
+async def cats(message: types.Message):
+    with open('data/cats.jpg', 'rb') as photo:
+        '''
+        # Old fashioned way:
+        await bot.send_photo(
+            message.chat.id,
+            photo,
+            caption='Cats are here 😺',
+            reply_to_message_id=message.message_id,
+        )
+        '''
+
+        await message.reply_photo(photo, caption='Cats are here 😺')
+
+
+@dp.message_handler()
+async def echo(message: types.Message):
+    # old style:
+    # await bot.send_message(message.chat.id, message.text)
+    #asyncio.run(main1(cities))
+    await message.answer(message.text + '_H')
+
+
+if __name__ == '__main__':
+    executor.start_polling(dp, skip_updates=True)
